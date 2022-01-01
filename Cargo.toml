@@ -10,7 +10,10 @@ rust-version = "1.56"
 version = "0.1.0"
 
 [dependencies]
-blst = "0.3"
-rand = "0.8"
-rand_chacha = "0.3"
+# blst = "0.3"
+gflags = "0.3"
+# rand = "0.8"
+# rand_chacha = "0.3"
+log = "0.4"
+tokio = {version = "1", features = ["full"]}
 turbosql = "0.4"

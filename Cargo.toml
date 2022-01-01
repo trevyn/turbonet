@@ -1,0 +1,16 @@
+[package]
+authors = ["trevyn <trevyn-git@protonmail.com>"]
+documentation = "https://docs.rs/turbonet"
+edition = "2021"
+license = "MIT OR Apache-2.0 OR CC0-1.0"
+name = "turbonet"
+readme = "../README.md"
+repository = "https://github.com/trevyn/turbonet"
+rust-version = "1.56"
+version = "0.1.0"
+
+[dependencies]
+blst = "0.3"
+rand = "0.8"
+rand_chacha = "0.3"
+turbosql = "0.4"

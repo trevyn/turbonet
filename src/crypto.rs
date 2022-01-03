@@ -2,6 +2,7 @@ use blst::min_sig::*;
 use rand::{RngCore, SeedableRng};
 use rand_chacha::ChaCha20Rng;
 
+#[allow(dead_code)]
 pub struct KeyMaterial {
  secret_key: [u8; 32],
  public_key: [u8; 96],

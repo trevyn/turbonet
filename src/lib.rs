@@ -2,6 +2,8 @@
 #![allow(non_camel_case_types)]
 #![doc = include_str!("../README.md")]
 
+mod crypto;
+
 gflags::define!(--turbonet_bootstrap_ip: &str);
 gflags::define!(--turbonet_bootstrap_port: u16 = 34254);
 gflags::define!(--turbonet_listen_port: u16 = 34254);
@@ -15,6 +17,20 @@ struct _Turbonet_Peers {
  ip: Option<u32>,
  port: Option<u16>,
  last_seen_ms: Option<i64>,
+ public_key: Option<[u8; 96]>,
+ proof_of_possession: Option<[u8; 48]>,
+ base_url: Option<String>,
+}
+
+#[derive(Turbosql, Default)]
+struct _Turbonet_Self {
+ rowid: Option<i64>,
+ ip: Option<u32>,
+ port: Option<u16>,
+ secret_key: Option<[u8; 32]>,
+ public_key: Option<[u8; 96]>,
+ proof_of_possession: Option<[u8; 48]>,
+ base_url: Option<String>,
 }
 
 /// Start a new Turbonet server. Runs indefinitely.

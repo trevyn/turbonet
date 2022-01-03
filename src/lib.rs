@@ -4,6 +4,8 @@
 
 mod crypto;
 
+pub use crypto::KeyMaterial;
+
 gflags::define!(--turbonet_bootstrap_ip: &str);
 gflags::define!(--turbonet_bootstrap_port: u16 = 34254);
 gflags::define!(--turbonet_listen_port: u16 = 34254);

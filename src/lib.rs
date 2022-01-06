@@ -73,6 +73,6 @@ mod tests {
   tokio::spawn(async move {
    run().await.unwrap();
   });
-  tokio::time::sleep(tokio::time::Duration::from_millis(4000)).await;
+  tokio::time::sleep(tokio::time::Duration::from_millis(2000)).await;
  }
 }

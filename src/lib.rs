@@ -52,14 +52,16 @@ pub async fn run() -> Result<(), Box<dyn std::error::Error>> {
    ..Default::default()
   }
   .insert()?;
+
+  tokio::spawn(async move {
+   loop {
+    tokio::time::sleep(tokio::time::Duration::from_millis(2000)).await;
+    dbg!(remote_turbonet_heartbeat(&format!("{}:34254", TURBONET_BOOTSTRAP_IP.flag)).await);
+   }
+  });
  } else {
   log::info!("TURBONET_BOOTSTRAP_IP is NOT PRESENT");
  }
-
- tokio::spawn(async move {
-  tokio::time::sleep(tokio::time::Duration::from_millis(1000)).await;
-  dbg!(remote_turbonet_heartbeat("127.0.0.1:34254").await);
- });
 
  turbocharger::run_udp_server(TURBONET_LISTEN_PORT.flag).await
 }
@@ -73,6 +75,6 @@ mod tests {
   tokio::spawn(async move {
    run().await.unwrap();
   });
-  tokio::time::sleep(tokio::time::Duration::from_millis(2000)).await;
+  tokio::time::sleep(tokio::time::Duration::from_secs(2000)).await;
  }
 }

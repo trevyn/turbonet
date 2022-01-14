@@ -41,8 +41,10 @@ pub async fn turbonet_heartbeat() -> String {
  "beat!".to_string()
 }
 
-/// Start a new Turbonet server. Runs indefinitely.
-pub async fn run() -> Result<(), Box<dyn std::error::Error>> {
+/// Spawn a new Turbonet server. Future resolves when the server is ready to accept connections.
+pub async fn spawn_server() -> Result<(), Box<dyn std::error::Error>> {
+ turbocharger::spawn_udp_server(TURBONET_LISTEN_PORT.flag).await.unwrap();
+
  if TURBONET_BOOTSTRAP_IP.is_present() {
   log::info!("TURBONET_BOOTSTRAP_IP is {}", TURBONET_BOOTSTRAP_IP.flag);
   let ip: std::net::Ipv4Addr = TURBONET_BOOTSTRAP_IP.flag.parse()?;
@@ -55,15 +57,15 @@ pub async fn run() -> Result<(), Box<dyn std::error::Error>> {
 
   tokio::spawn(async move {
    loop {
-    tokio::time::sleep(tokio::time::Duration::from_millis(2000)).await;
     dbg!(remote_turbonet_heartbeat(&format!("{}:34254", TURBONET_BOOTSTRAP_IP.flag)).await);
+    tokio::time::sleep(tokio::time::Duration::from_millis(2000)).await;
    }
   });
  } else {
   log::info!("TURBONET_BOOTSTRAP_IP is NOT PRESENT");
  }
 
- turbocharger::run_udp_server(TURBONET_LISTEN_PORT.flag).await
+ Ok(())
 }
 
 #[cfg(test)]
@@ -71,10 +73,7 @@ mod tests {
  use super::*;
 
  #[tokio::test]
- async fn test_run() {
-  tokio::spawn(async move {
-   run().await.unwrap();
-  });
-  tokio::time::sleep(tokio::time::Duration::from_secs(2000)).await;
+ async fn test_spawn() {
+  spawn_server().await.unwrap();
  }
 }

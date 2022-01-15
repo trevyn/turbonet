@@ -20,8 +20,9 @@ struct _Turbonet_Peers {
  ip: Option<u32>,
  port: Option<u16>,
  last_seen_ms: Option<i64>,
- public_key: Option<[u8; 96]>,
- proof_of_possession: Option<[u8; 48]>,
+ crypto_box_public_key: Option<[u8; 32]>,
+ bls_public_key: Option<[u8; 96]>,
+ bls_proof_of_possession: Option<[u8; 48]>,
  base_url: Option<String>,
 }
 
@@ -30,9 +31,11 @@ struct _Turbonet_Self {
  rowid: Option<i64>,
  ip: Option<u32>,
  port: Option<u16>,
- secret_key: Option<[u8; 32]>,
- public_key: Option<[u8; 96]>,
- proof_of_possession: Option<[u8; 48]>,
+ crypto_box_secret_key: Option<[u8; 32]>,
+ crypto_box_public_key: Option<[u8; 32]>,
+ bls_secret_key: Option<[u8; 32]>,
+ bls_public_key: Option<[u8; 96]>,
+ bls_proof_of_possession: Option<[u8; 48]>,
  base_url: Option<String>,
 }
 

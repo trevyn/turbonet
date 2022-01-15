@@ -14,5 +14,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
  turbonet::spawn_server().await.unwrap();
 
  tokio::time::sleep(tokio::time::Duration::from_secs(2000)).await;
+
  Ok(())
 }

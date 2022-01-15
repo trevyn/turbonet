@@ -11,6 +11,7 @@ version = "0.1.0"
 
 [dependencies]
 blst = "0.3"
+crypto_box = "0.7"
 gflags = "0.3"
 hex = "0.4"
 log = "0.4"

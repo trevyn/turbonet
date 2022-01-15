@@ -12,7 +12,7 @@ gflags::define!(--turbonet_bootstrap_port: u16 = 34254);
 gflags::define!(--turbonet_listen_port: u16 = 34254);
 gflags::define!(--turbonet_heartbeat_interval_seconds: u16 = 3);
 
-use turbosql::Turbosql;
+use turbosql::{select, Turbosql};
 
 #[derive(Turbosql, Default)]
 struct _Turbonet_Peers {
@@ -26,7 +26,7 @@ struct _Turbonet_Peers {
  base_url: Option<String>,
 }
 
-#[derive(Turbosql, Default)]
+#[derive(Turbosql, Default, Debug)]
 struct _Turbonet_Self {
  rowid: Option<i64>,
  ip: Option<u32>,
@@ -39,6 +39,19 @@ struct _Turbonet_Self {
  base_url: Option<String>,
 }
 
+impl _Turbonet_Self {
+ fn generate() -> Self {
+  let mut rng = crypto_box::rand_core::OsRng;
+  let crypto_box_secret_key = crypto_box::SecretKey::generate(&mut rng);
+
+  _Turbonet_Self {
+   crypto_box_secret_key: Some(crypto_box_secret_key.as_bytes().to_owned()),
+   crypto_box_public_key: Some(crypto_box_secret_key.public_key().as_bytes().to_owned()),
+   ..Default::default()
+  }
+ }
+}
+
 #[backend]
 pub async fn turbonet_heartbeat() -> String {
  "beat!".to_string()
@@ -46,6 +59,14 @@ pub async fn turbonet_heartbeat() -> String {
 
 /// Spawn a new Turbonet server. Future resolves when the server is ready to accept connections.
 pub async fn spawn_server() -> Result<(), Box<dyn std::error::Error>> {
+ let turbonet_self = select!(Option<_Turbonet_Self>)?.unwrap_or_else(|| {
+  let turbonet_self = _Turbonet_Self::generate();
+  turbonet_self.insert().unwrap();
+  turbonet_self
+ });
+
+ dbg!(turbonet_self);
+
  turbocharger::spawn_udp_server(TURBONET_LISTEN_PORT.flag).await.unwrap();
 
  if TURBONET_BOOTSTRAP_IP.is_present() {

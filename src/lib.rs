@@ -76,10 +76,12 @@ struct SelfResult {
  // bls_public_key: [u8; 96],
  // bls_proof_of_possession: [u8; 48],
  base_url: Option<String>,
+ build_id: String,
 }
 
 impl From<_Turbonet_Self> for SelfResult {
  fn from(item: _Turbonet_Self) -> Self {
+  #[allow(clippy::or_fun_call)]
   SelfResult {
    ip: 2130706433,
    // port: item.port.unwrap(),
@@ -87,6 +89,9 @@ impl From<_Turbonet_Self> for SelfResult {
    // bls_public_key: self.bls_public_key,
    // bls_proof_of_possession: self.bls_proof_of_possession,
    base_url: item.base_url,
+   build_id: option_env!("BUILD_ID")
+    .unwrap_or(format!("DEV {}", option_env!("BUILD_TIME").unwrap_or_default()).as_str())
+    .to_owned(),
   }
  }
 }

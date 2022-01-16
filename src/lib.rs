@@ -10,7 +10,7 @@ use turbocharger::backend;
 gflags::define!(--turbonet_bootstrap_ip: &str);
 gflags::define!(--turbonet_bootstrap_port: u16 = 34254);
 gflags::define!(--turbonet_listen_port: u16 = 34254);
-gflags::define!(--turbonet_heartbeat_interval_seconds: u16 = 3);
+gflags::define!(--turbonet_heartbeat_interval_seconds: u16 = 2);
 
 use turbosql::{select, Turbosql};
 
@@ -24,6 +24,21 @@ struct _Turbonet_Peers {
  bls_public_key: Option<[u8; 96]>,
  bls_proof_of_possession: Option<[u8; 48]>,
  base_url: Option<String>,
+}
+
+impl From<SelfResult> for _Turbonet_Peers {
+ fn from(item: SelfResult) -> Self {
+  _Turbonet_Peers {
+   ip: Some(item.ip),
+   // port: item.port,
+   // last_seen_ms: item.last_seen_ms,
+   crypto_box_public_key: Some(item.crypto_box_public_key),
+   // bls_public_key: item.bls_public_key,
+   // bls_proof_of_possession: item.bls_proof_of_possession,
+   base_url: item.base_url,
+   ..Default::default()
+  }
+ }
 }
 
 #[derive(Turbosql, Default, Debug)]
@@ -53,14 +68,9 @@ impl _Turbonet_Self {
 }
 
 #[backend]
-pub async fn turbonet_heartbeat() -> String {
- "beat!".to_string()
-}
-
-#[backend]
 #[derive(PartialEq)]
 struct SelfResult {
- // ip: u32,
+ ip: u32,
  // port: u16,
  crypto_box_public_key: [u8; 32],
  // bls_public_key: [u8; 96],
@@ -71,7 +81,7 @@ struct SelfResult {
 impl From<_Turbonet_Self> for SelfResult {
  fn from(item: _Turbonet_Self) -> Self {
   SelfResult {
-   // ip: item.ip.unwrap(),
+   ip: 2130706433,
    // port: item.port.unwrap(),
    crypto_box_public_key: item.crypto_box_public_key.unwrap(),
    // bls_public_key: self.bls_public_key,
@@ -101,17 +111,28 @@ pub async fn spawn_server() -> Result<(), Box<dyn std::error::Error>> {
  if TURBONET_BOOTSTRAP_IP.is_present() {
   log::info!("TURBONET_BOOTSTRAP_IP is {}", TURBONET_BOOTSTRAP_IP.flag);
   let ip: std::net::Ipv4Addr = TURBONET_BOOTSTRAP_IP.flag.parse()?;
-  _Turbonet_Peers {
-   ip: Some(ip.into()),
-   port: Some(TURBONET_BOOTSTRAP_PORT.flag),
-   ..Default::default()
-  }
-  .insert()?;
+  let ip: u32 = ip.into();
 
   tokio::spawn(async move {
    loop {
-    dbg!(remote_turbonet_self(&format!("{}:34254", TURBONET_BOOTSTRAP_IP.flag)).await);
-    tokio::time::sleep(tokio::time::Duration::from_millis(2000)).await;
+    let mut peer: _Turbonet_Peers =
+     remote_turbonet_self(&format!("{}:34254", TURBONET_BOOTSTRAP_IP.flag)).await.into();
+    peer.last_seen_ms =
+     Some(std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_millis()
+      as i64);
+    // if we have the peer, update it, otherwise insert it
+    if let Some(_Turbonet_Peers { rowid, .. }) =
+     select!(Option<_Turbonet_Peers> "WHERE ip = ?", ip).unwrap()
+    {
+     peer.rowid = rowid;
+     peer.update().unwrap();
+    } else {
+     peer.insert().unwrap();
+    }
+    tokio::time::sleep(tokio::time::Duration::from_secs(
+     TURBONET_HEARTBEAT_INTERVAL_SECONDS.flag.into(),
+    ))
+    .await;
    }
   });
  } else {

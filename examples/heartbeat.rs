@@ -11,7 +11,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
   gflags::print_help_and_exit(0);
  }
 
- turbonet::spawn_server().await.unwrap();
+ turbonet::spawn_server("heartbeat").await.unwrap();
 
  tokio::time::sleep(tokio::time::Duration::from_secs(2000)).await;
 

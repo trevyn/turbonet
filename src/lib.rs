@@ -54,6 +54,7 @@ struct _Turbonet_Self {
  bls_public_key: Option<[u8; 96]>,
  bls_proof_of_possession: Option<[u8; 48]>,
  base_url: Option<String>,
+ build_id: Option<String>,
 }
 
 impl _Turbonet_Self {
@@ -83,7 +84,6 @@ struct SelfResult {
 
 impl From<_Turbonet_Self> for SelfResult {
  fn from(item: _Turbonet_Self) -> Self {
-  #[allow(clippy::or_fun_call)]
   SelfResult {
    ip: 2130706433,
    // port: item.port.unwrap(),
@@ -91,9 +91,7 @@ impl From<_Turbonet_Self> for SelfResult {
    // bls_public_key: self.bls_public_key,
    // bls_proof_of_possession: self.bls_proof_of_possession,
    base_url: item.base_url,
-   build_id: option_env!("BUILD_ID")
-    .unwrap_or(format!("DEV {}", option_env!("BUILD_TIME").unwrap_or_default()).as_str())
-    .to_owned(),
+   build_id: item.build_id.unwrap(),
   }
  }
 }
@@ -104,12 +102,16 @@ pub async fn turbonet_self() -> SelfResult {
 }
 
 /// Spawn a new Turbonet server. Future resolves when the server is ready to accept connections.
-pub async fn spawn_server() -> Result<(), Box<dyn std::error::Error>> {
- let turbonet_self = select!(Option<_Turbonet_Self>)?.unwrap_or_else(|| {
+pub async fn spawn_server(build_id: &str) -> Result<(), Box<dyn std::error::Error>> {
+ let mut turbonet_self = select!(Option<_Turbonet_Self>)?.unwrap_or_else(|| {
   let turbonet_self = _Turbonet_Self::generate();
   turbonet_self.insert().unwrap();
   turbonet_self
  });
+
+ turbonet_self.rowid = Some(1);
+ turbonet_self.build_id = Some(build_id.to_owned());
+ turbonet_self.update()?;
 
  dbg!(turbonet_self);
 
@@ -155,7 +157,7 @@ mod tests {
 
  #[tokio::test]
  async fn test_server() {
-  spawn_server().await.unwrap();
+  spawn_server("test").await.unwrap();
   let peer = remote_turbonet_self("127.0.0.1:34254").await;
   assert_eq!(peer, select!(_Turbonet_Self).unwrap().into());
   dbg!(peer);

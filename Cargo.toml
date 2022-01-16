@@ -24,9 +24,6 @@ turbosql = "0.4"
 [dev-dependencies]
 pretty_env_logger = "0.4"
 
-[build-dependencies]
-chrono = "0.4"
-
 [patch.crates-io]
 rusqlite = {git = "https://github.com/rusqlite/rusqlite", branch = "master"}
 turbocharger = {git = "https://github.com/trevyn/turbocharger", branch = "main"}

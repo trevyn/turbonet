@@ -14,14 +14,20 @@ gflags::define!(--turbonet_heartbeat_interval_seconds: u16 = 3);
 
 use turbosql::{select, Turbosql};
 
-#[derive(Turbosql, Default)]
+use serde_with::serde_as;
+
+#[serde_as]
+#[backend]
+#[derive(Turbosql)]
 struct _Turbonet_Peers {
  rowid: Option<i64>,
  ip: Option<u32>,
  port: Option<u16>,
  last_seen_ms: Option<i64>,
  crypto_box_public_key: Option<[u8; 32]>,
+ #[serde_as(as = "Option<[_; 96]>")]
  bls_public_key: Option<[u8; 96]>,
+ #[serde_as(as = "Option<[_; 48]>")]
  bls_proof_of_possession: Option<[u8; 48]>,
  base_url: Option<String>,
 }
@@ -50,11 +56,26 @@ impl _Turbonet_Self {
    ..Default::default()
   }
  }
+
+ fn to_peer(&self) -> _Turbonet_Peers {
+  _Turbonet_Peers {
+   crypto_box_public_key: self.crypto_box_public_key,
+   bls_public_key: self.bls_public_key,
+   bls_proof_of_possession: self.bls_proof_of_possession,
+   base_url: self.base_url.clone(),
+   ..Default::default()
+  }
+ }
 }
 
 #[backend]
 pub async fn turbonet_heartbeat() -> String {
  "beat!".to_string()
+}
+
+#[backend]
+pub async fn turbonet_self() -> _Turbonet_Peers {
+ select!(_Turbonet_Self).unwrap().to_peer()
 }
 
 /// Spawn a new Turbonet server. Future resolves when the server is ready to accept connections.
@@ -99,5 +120,6 @@ mod tests {
  #[tokio::test]
  async fn test_spawn() {
   spawn_server().await.unwrap();
+  dbg!(remote_turbonet_self("127.0.0.1:34254").await);
  }
 }

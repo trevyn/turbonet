@@ -14,20 +14,14 @@ gflags::define!(--turbonet_heartbeat_interval_seconds: u16 = 3);
 
 use turbosql::{select, Turbosql};
 
-use serde_with::serde_as;
-
-#[serde_as]
-#[backend]
-#[derive(Turbosql)]
+#[derive(Turbosql, Default)]
 struct _Turbonet_Peers {
  rowid: Option<i64>,
  ip: Option<u32>,
  port: Option<u16>,
  last_seen_ms: Option<i64>,
  crypto_box_public_key: Option<[u8; 32]>,
- #[serde_as(as = "Option<[_; 96]>")]
  bls_public_key: Option<[u8; 96]>,
- #[serde_as(as = "Option<[_; 48]>")]
  bls_proof_of_possession: Option<[u8; 48]>,
  base_url: Option<String>,
 }
@@ -56,16 +50,6 @@ impl _Turbonet_Self {
    ..Default::default()
   }
  }
-
- fn to_peer(&self) -> _Turbonet_Peers {
-  _Turbonet_Peers {
-   crypto_box_public_key: self.crypto_box_public_key,
-   bls_public_key: self.bls_public_key,
-   bls_proof_of_possession: self.bls_proof_of_possession,
-   base_url: self.base_url.clone(),
-   ..Default::default()
-  }
- }
 }
 
 #[backend]
@@ -74,8 +58,32 @@ pub async fn turbonet_heartbeat() -> String {
 }
 
 #[backend]
-pub async fn turbonet_self() -> _Turbonet_Peers {
- select!(_Turbonet_Self).unwrap().to_peer()
+#[derive(PartialEq)]
+struct SelfResult {
+ // ip: u32,
+ // port: u16,
+ crypto_box_public_key: [u8; 32],
+ // bls_public_key: [u8; 96],
+ // bls_proof_of_possession: [u8; 48],
+ base_url: Option<String>,
+}
+
+impl From<_Turbonet_Self> for SelfResult {
+ fn from(item: _Turbonet_Self) -> Self {
+  SelfResult {
+   // ip: item.ip.unwrap(),
+   // port: item.port.unwrap(),
+   crypto_box_public_key: item.crypto_box_public_key.unwrap(),
+   // bls_public_key: self.bls_public_key,
+   // bls_proof_of_possession: self.bls_proof_of_possession,
+   base_url: item.base_url,
+  }
+ }
+}
+
+#[backend]
+pub async fn turbonet_self() -> SelfResult {
+ select!(_Turbonet_Self).unwrap().into()
 }
 
 /// Spawn a new Turbonet server. Future resolves when the server is ready to accept connections.
@@ -102,7 +110,7 @@ pub async fn spawn_server() -> Result<(), Box<dyn std::error::Error>> {
 
   tokio::spawn(async move {
    loop {
-    dbg!(remote_turbonet_heartbeat(&format!("{}:34254", TURBONET_BOOTSTRAP_IP.flag)).await);
+    dbg!(remote_turbonet_self(&format!("{}:34254", TURBONET_BOOTSTRAP_IP.flag)).await);
     tokio::time::sleep(tokio::time::Duration::from_millis(2000)).await;
    }
   });
@@ -118,8 +126,10 @@ mod tests {
  use super::*;
 
  #[tokio::test]
- async fn test_spawn() {
+ async fn test_server() {
   spawn_server().await.unwrap();
-  dbg!(remote_turbonet_self("127.0.0.1:34254").await);
+  let peer = remote_turbonet_self("127.0.0.1:34254").await;
+  assert_eq!(peer, select!(_Turbonet_Self).unwrap().into());
+  dbg!(peer);
  }
 }

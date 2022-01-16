@@ -24,6 +24,7 @@ struct _Turbonet_Peers {
  bls_public_key: Option<[u8; 96]>,
  bls_proof_of_possession: Option<[u8; 48]>,
  base_url: Option<String>,
+ build_id: Option<String>,
 }
 
 impl From<SelfResult> for _Turbonet_Peers {
@@ -36,6 +37,7 @@ impl From<SelfResult> for _Turbonet_Peers {
    // bls_public_key: item.bls_public_key,
    // bls_proof_of_possession: item.bls_proof_of_possession,
    base_url: item.base_url,
+   build_id: Some(item.build_id),
    ..Default::default()
   }
  }

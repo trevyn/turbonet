@@ -64,9 +64,9 @@ impl _Turbonet_Self {
  }
 }
 
-impl From<_Turbonet_Self> for Turbonet_SelfResponse {
- fn from(item: _Turbonet_Self) -> Turbonet_SelfResponse {
-  Turbonet_SelfResponse {
+impl From<_Turbonet_Self> for _Turbonet_SelfResponse {
+ fn from(item: _Turbonet_Self) -> _Turbonet_SelfResponse {
+  _Turbonet_SelfResponse {
    crypto_box_public_key: item.crypto_box_public_key.unwrap(),
    bls_public_key: item.bls_public_key.unwrap(),
    bls_proof_of_possession: item.bls_proof_of_possession.unwrap(),
@@ -79,7 +79,7 @@ impl From<_Turbonet_Self> for Turbonet_SelfResponse {
 #[serde_as]
 #[backend]
 #[derive(PartialEq, Debug)]
-struct Turbonet_SelfResponse {
+struct _Turbonet_SelfResponse {
  crypto_box_public_key: [u8; 32],
  #[serde_as(as = "[_; 96]")]
  bls_public_key: [u8; 96],
@@ -90,7 +90,7 @@ struct Turbonet_SelfResponse {
 }
 
 #[backend]
-pub async fn turbonet_self() -> Turbonet_SelfResponse {
+pub async fn _turbonet_self() -> _Turbonet_SelfResponse {
  select!(_Turbonet_Self).unwrap().into()
 }
 
@@ -109,7 +109,7 @@ impl _Turbonet_Peer {
   peer.last_request_ms = Some(now_millis());
   peer.update().unwrap();
 
-  let response = remote_turbonet_self(&format!(
+  let response = remote__turbonet_self(&format!(
    "{}:{}",
    std::net::Ipv4Addr::from(peer.ip.unwrap()),
    peer.port.unwrap()
@@ -172,7 +172,7 @@ mod tests {
  #[tokio::test]
  async fn test_server() {
   spawn_server("test").await.unwrap();
-  let peer = remote_turbonet_self("127.0.0.1:34254").await;
+  let peer = remote__turbonet_self("127.0.0.1:34254").await;
   assert_eq!(peer, select!(_Turbonet_Self).unwrap().into());
   dbg!(peer);
  }

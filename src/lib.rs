@@ -64,9 +64,9 @@ impl _Turbonet_Self {
  }
 }
 
-impl From<_Turbonet_Self> for SelfResponse {
- fn from(item: _Turbonet_Self) -> SelfResponse {
-  SelfResponse {
+impl From<_Turbonet_Self> for Turbonet_SelfResponse {
+ fn from(item: _Turbonet_Self) -> Turbonet_SelfResponse {
+  Turbonet_SelfResponse {
    crypto_box_public_key: item.crypto_box_public_key.unwrap(),
    bls_public_key: item.bls_public_key.unwrap(),
    bls_proof_of_possession: item.bls_proof_of_possession.unwrap(),
@@ -79,7 +79,7 @@ impl From<_Turbonet_Self> for SelfResponse {
 #[serde_as]
 #[backend]
 #[derive(PartialEq, Debug)]
-struct SelfResponse {
+struct Turbonet_SelfResponse {
  crypto_box_public_key: [u8; 32],
  #[serde_as(as = "[_; 96]")]
  bls_public_key: [u8; 96],
@@ -90,7 +90,7 @@ struct SelfResponse {
 }
 
 #[backend]
-pub async fn turbonet_self() -> SelfResponse {
+pub async fn turbonet_self() -> Turbonet_SelfResponse {
  select!(_Turbonet_Self).unwrap().into()
 }
 

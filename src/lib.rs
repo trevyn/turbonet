@@ -138,7 +138,7 @@ pub async fn spawn_server(build_id: &str) -> Result<(), Box<dyn std::error::Erro
  turbonet_self.build_id = Some(build_id.to_owned());
  turbonet_self.update()?;
 
- dbg!(turbonet_self);
+ // dbg!(turbonet_self);
 
  turbocharger::spawn_udp_server(TURBONET_LISTEN_PORT.flag).await.unwrap();
 

@@ -10,7 +10,7 @@ rust-version = "1.56"
 version = "0.1.0"
 
 [dependencies]
-blst = "0.3"
+blst = {version = "0.3", features = ["portable"]}
 crypto_box = "0.7.1"
 gflags = "0.3"
 hex = "0.4"

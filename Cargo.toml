@@ -29,7 +29,7 @@ tokio = {version = "1", features = ["macros", "rt-multi-thread"]}
 
 [patch.crates-io]
 rusqlite = {git = "https://github.com/rusqlite/rusqlite", branch = "master"}
-turbocharger = {git = "https://github.com/trevyn/turbocharger", branch = "main"}
+turbocharger = {git = "https://github.com/trevyn/turbocharger", branch = "axum"}
 # turbocharger = {path = "../turbocharger/turbocharger"}
 turbosql = {git = "https://github.com/trevyn/turbosql", branch = "main"}
 

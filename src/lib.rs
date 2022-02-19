@@ -123,12 +123,16 @@ impl _Turbonet_Peer {
 }
 
 /// Spawn a new Turbonet server. Future resolves when the server is ready to accept connections.
-pub async fn spawn_server(build_id: &str) -> Result<(), Box<dyn std::error::Error>> {
- let mut turbonet_self = select!(Option<_Turbonet_Self>)?.unwrap_or_else(|| {
-  let turbonet_self = _Turbonet_Self::generate_keys();
-  turbonet_self.insert().unwrap();
-  turbonet_self
- });
+#[tracked::tracked]
+pub async fn spawn_server(build_id: &str) -> tracked::Result<()> {
+ let mut turbonet_self = match select!(Option<_Turbonet_Self>)? {
+  Some(turbonet_self) => turbonet_self,
+  None => {
+   let turbonet_self = _Turbonet_Self::generate_keys();
+   turbonet_self.insert()?;
+   turbonet_self
+  }
+ };
 
  turbonet_self.rowid = Some(1);
  turbonet_self.build_id = Some(build_id.to_owned());
@@ -136,12 +140,12 @@ pub async fn spawn_server(build_id: &str) -> Result<(), Box<dyn std::error::Erro
 
  // dbg!(turbonet_self);
 
- turbocharger::spawn_udp_server(TURBONET_LISTEN_PORT.flag).await.unwrap();
+ turbocharger::spawn_udp_server(TURBONET_LISTEN_PORT.flag).await?;
 
  if TURBONET_BOOTSTRAP_IP.is_present() {
   log::info!("TURBONET_BOOTSTRAP_IP is {}", TURBONET_BOOTSTRAP_IP.flag);
-  let ip: std::net::Ipv4Addr = TURBONET_BOOTSTRAP_IP.flag.parse()?;
-  let ip: u32 = ip.into();
+  let ip: Result<std::net::Ipv4Addr, _> = TURBONET_BOOTSTRAP_IP.flag.parse();
+  let ip: u32 = ip?.into();
 
   tokio::spawn(async move {
    loop {

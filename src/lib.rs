@@ -6,16 +6,12 @@ mod crypto;
 
 use serde_with::serde_as;
 use turbocharger::backend;
-use turbosql::{select, Turbosql};
+use turbosql::{now_ms, select, Turbosql};
 
 gflags::define!(--turbonet_bootstrap_ip: &str);
 gflags::define!(--turbonet_bootstrap_port: u16 = 34254);
 gflags::define!(--turbonet_listen_port: u16 = 34254);
 gflags::define!(--turbonet_heartbeat_interval_seconds: u16 = 2);
-
-fn now_millis() -> i64 {
- std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_millis() as i64
-}
 
 // SELECT rowid,ip,last_request_ms,last_response_ms,build_id,substr(hex(crypto_box_public_key), 1, 8) AS cb_public FROM _turbonet_peer;
 #[derive(Turbosql, Default, Debug)]
@@ -106,7 +102,7 @@ impl _Turbonet_Peer {
    _Turbonet_Peer { rowid: Some(self.insert().unwrap()), ..self }
   };
 
-  peer.last_request_ms = Some(now_millis());
+  peer.last_request_ms = Some(now_ms());
   peer.update().unwrap();
 
   let response = remote__turbonet_self(&format!(
@@ -121,7 +117,7 @@ impl _Turbonet_Peer {
   peer.bls_proof_of_possession = Some(response.bls_proof_of_possession);
   peer.build_id = Some(response.build_id);
   peer.base_url = response.base_url;
-  peer.last_response_ms = Some(now_millis());
+  peer.last_response_ms = Some(now_ms());
   peer.update().unwrap();
  }
 }

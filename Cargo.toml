@@ -20,7 +20,7 @@ rand_chacha = "0.3"
 serde_with = "1"
 tokio = {version = "1", features = ["rt"]}
 tracked = "0.1"
-turbocharger = "0.2"
+turbocharger = "0.3"
 turbosql = "0.5"
 
 [dev-dependencies]
@@ -28,10 +28,10 @@ pretty_env_logger = "0.4"
 tokio = {version = "1", features = ["macros", "rt-multi-thread"]}
 
 [patch.crates-io]
-rusqlite = {git = "https://github.com/rusqlite/rusqlite", branch = "master"}
-turbocharger = {git = "https://github.com/trevyn/turbocharger", branch = "axum"}
+# rusqlite = {git = "https://github.com/rusqlite/rusqlite", branch = "master"}
+# turbocharger = {git = "https://github.com/trevyn/turbocharger", branch = "axum"}
 # turbocharger = {path = "../turbocharger/turbocharger"}
-turbosql = {git = "https://github.com/trevyn/turbosql", branch = "main"}
+# turbosql = {git = "https://github.com/trevyn/turbosql", branch = "main"}
 
 [profile.dev]
 incremental = false # see https://github.com/dtolnay/inventory/issues/24

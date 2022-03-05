@@ -1,5 +1,5 @@
 [package]
-authors = ["trevyn <trevyn-git@protonmail.com>"]
+authors = ["The authors"]
 documentation = "https://docs.rs/turbonet"
 edition = "2021"
 license = "MIT OR Apache-2.0 OR CC0-1.0"
@@ -21,7 +21,7 @@ serde_with = "1"
 tokio = {version = "1", features = ["rt"]}
 tracked = "0.1"
 turbocharger = "0.2"
-turbosql = "0.4"
+turbosql = "0.5"
 
 [dev-dependencies]
 pretty_env_logger = "0.4"

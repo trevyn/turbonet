@@ -124,7 +124,7 @@ impl _Turbonet_Peer {
 
 /// Spawn a new Turbonet server. Future resolves when the server is ready to accept connections.
 #[tracked::tracked]
-pub async fn spawn_server(build_id: &str) -> tracked::Result<()> {
+pub async fn spawn_server(build_id: &str) -> Result<(), tracked::StringError> {
  let mut turbonet_self = match select!(Option<_Turbonet_Self>)? {
   Some(turbonet_self) => turbonet_self,
   None => {

@@ -6,7 +6,7 @@ license = "MIT OR Apache-2.0 OR CC0-1.0"
 name = "turbonet"
 readme = "../README.md"
 repository = "https://github.com/trevyn/turbonet"
-rust-version = "1.56"
+rust-version = "1.62"
 version = "0.1.0"
 
 [dependencies]

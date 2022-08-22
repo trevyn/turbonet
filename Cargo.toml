@@ -11,7 +11,7 @@ version = "0.1.0"
 
 [dependencies]
 blst = {version = "0.3", features = ["portable"]}
-crypto_box = "0.7.1"
+crypto_box = "0.8.1"
 futures-util = {version = "0.3", features = ["sink"]}
 gflags = "0.3"
 hex = "0.4"

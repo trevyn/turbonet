@@ -3,10 +3,14 @@ name: ci
 on:
   push:
   pull_request:
-  schedule: [cron: '40 1 * * *']
+  schedule: [cron: "40 1 * * *"]
+
+permissions:
+  contents: read
 
 env:
   CARGO_TERM_COLOR: always
+  CARGO_UNSTABLE_SPARSE_REGISTRY: true
 
 jobs:
   test:
@@ -18,14 +22,12 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest]
         rust: ["1.62", stable, beta, nightly]
-#               1.62 is minimum rust-version
+
     steps:
       - uses: actions/checkout@v3
 
-      - uses: hecrj/setup-rust-action@v1
-        with:
-          rust-version: ${{ matrix.rust }}
-      
+      - run: rustup default ${{ matrix.rust }} && rustup update ${{ matrix.rust }}
+
       - run: cargo build
       - run: cargo test -- --nocapture
       - run: cargo doc --no-deps

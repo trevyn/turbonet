@@ -4,7 +4,7 @@ gflags::define!(-h, --help = false);
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
- pretty_env_logger::init_timed();
+ tracing_subscriber::fmt::init();
  gflags::parse();
 
  if HELP.flag {
